@@ -1,28 +1,31 @@
 import express from 'express'
-import mongoose from 'mongoose'
+import { connect } from 'mongoose'
+import { User } from './models/user'
 require('dotenv').config()
 
 const username = process.env.username || 'test'
 const password = process.env.password || 'test'
 
-// mongoose 연결
-mongoose
-  .connect(
-    `mongodb+srv://${username}:${password}@cluster0.jmhgybo.mongodb.net/?retryWrites=true&w=majority`,
-    {
-      // useNewUrlPaser: true,
-      // useUnifiedTofology: true,
-      // useCreateIndex: true,
-      // useFindAndModify: false,
-    }
+// 테스트 데이터 생성
+run().catch(err => console.log(err))
+
+async function run() {
+  // 4. Connect to MongoDB
+  await connect(
+    `mongodb+srv://${username}:${password}@cluster0.jmhgybo.mongodb.net/?retryWrites=true&w=majority`
   )
-  .then(value => {
-    console.log({ value })
-    console.log('mongo db connected')
+
+  await User.collection.drop()
+
+  const user = new User({
+    name: 'dobot',
+    email: 'dobot@test.com',
   })
-  .catch(err => {
-    console.log(err)
-  })
+  await user.save()
+
+  console.log(user)
+  // console.log(user.email) // 'dobot@test.com'
+}
 
 const app = express()
 const port = 6000
